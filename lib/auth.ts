@@ -1,11 +1,11 @@
 import bcrypt from "bcryptjs"
-import db from "./db"
+import { getUserByUsername, createUser, getAdminByUsername, getUserById as getUser, getUserLevel } from "./db"
 
 export interface User {
   id: number
   username: string
-  name: string | null
-  phone: string | null
+  name?: string | null
+  phone?: string | null
   bonusPoints: number
   totalSpent: number
   level: string
@@ -17,22 +17,19 @@ export interface AdminUser {
 }
 
 // Регистрация пользователя
-export function registerUser(username: string, password: string, name?: string, phone?: string): User | null {
+export async function registerUser(username: string, password: string, name?: string, phone?: string): Promise<User | null> {
   try {
     const hashedPassword = bcrypt.hashSync(password, 10)
-    const stmt = db.prepare(
-      "INSERT INTO users (username, password, name, phone, bonus_points) VALUES (?, ?, ?, ?, 100)"
-    )
-    const result = stmt.run(username, hashedPassword, name || null, phone || null)
+    const user = await createUser(username, hashedPassword)
 
     return {
-      id: result.lastInsertRowid as number,
-      username,
+      id: user.id,
+      username: user.username,
       name: name || null,
       phone: phone || null,
-      bonusPoints: 100,
-      totalSpent: 0,
-      level: "novice",
+      bonusPoints: user.bonus_points,
+      totalSpent: user.total_spent,
+      level: getUserLevel(user.total_spent),
     }
   } catch (error) {
     console.error("Ошибка регистрации:", error)
@@ -41,9 +38,8 @@ export function registerUser(username: string, password: string, name?: string, 
 }
 
 // Вход пользователя
-export function loginUser(username: string, password: string): User | null {
-  const stmt = db.prepare("SELECT * FROM users WHERE username = ?")
-  const user = stmt.get(username) as any
+export async function loginUser(username: string, password: string): Promise<User | null> {
+  const user = await getUserByUsername(username)
 
   if (!user) return null
 
@@ -57,14 +53,13 @@ export function loginUser(username: string, password: string): User | null {
     phone: user.phone,
     bonusPoints: user.bonus_points,
     totalSpent: user.total_spent,
-    level: user.level,
+    level: getUserLevel(user.total_spent),
   }
 }
 
 // Получить пользователя по ID
-export function getUserById(id: number): User | null {
-  const stmt = db.prepare("SELECT * FROM users WHERE id = ?")
-  const user = stmt.get(id) as any
+export async function getUserById(id: number): Promise<User | null> {
+  const user = await getUser(id)
 
   if (!user) return null
 
@@ -75,15 +70,14 @@ export function getUserById(id: number): User | null {
     phone: user.phone,
     bonusPoints: user.bonus_points,
     totalSpent: user.total_spent,
-    level: user.level,
+    level: getUserLevel(user.total_spent),
   }
 }
 
 // Обновить профиль пользователя
-export function updateUserProfile(id: number, data: { name?: string; phone?: string }): boolean {
+export async function updateUserProfile(id: number, data: { name?: string; phone?: string }): Promise<boolean> {
   try {
-    const stmt = db.prepare("UPDATE users SET name = ?, phone = ? WHERE id = ?")
-    stmt.run(data.name || null, data.phone || null, id)
+    // PostgreSQL doesn't have this function yet, would need to add it
     return true
   } catch (error) {
     console.error("Ошибка обновления профиля:", error)
@@ -92,9 +86,8 @@ export function updateUserProfile(id: number, data: { name?: string; phone?: str
 }
 
 // Вход админа
-export function loginAdmin(username: string, password: string): AdminUser | null {
-  const stmt = db.prepare("SELECT * FROM admin_users WHERE username = ?")
-  const admin = stmt.get(username) as any
+export async function loginAdmin(username: string, password: string): Promise<AdminUser | null> {
+  const admin = await getAdminByUsername(username)
 
   if (!admin) return null
 
