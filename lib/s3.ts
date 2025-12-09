@@ -1,15 +1,15 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3"
 
 const s3Client = new S3Client({
-  region: "ru-1",
-  endpoint: "https://s3.twcstorage.ru",
+  region: process.env.S3_REGION || "ru-1",
+  endpoint: process.env.S3_ENDPOINT || "https://s3.twcstorage.ru",
   credentials: {
-    accessKeyId: "COIYK2SG8X3MH8K3MYA",
-    secretAccessKey: "OUFPnIud8H1Gk7nwLxZD4hjDjP0bBuIWq1RgV4fGSw",
+    accessKeyId: process.env.S3_ACCESS_KEY || "COIYK2SG8X3MH8K3MYA",
+    secretAccessKey: process.env.S3_SECRET_KEY || "OUFPnIud8H1Gk7nwLxZD4hjDjP0bBuIWq1RgV4fG",
   },
 })
 
-const BUCKET_NAME = "d0bb84a6-35788b9e-6ba9-47ec-a1a8-68e9ea3ac4e9"
+const BUCKET_NAME = process.env.S3_BUCKET || "d0bb84a6-35788b9e-6ba9-47ec-a1a8-68e9ea3ac4e9"
 const FOLDER_NAME = "teadragonimages"
 
 export async function uploadImage(file: File, fileName: string): Promise<string> {

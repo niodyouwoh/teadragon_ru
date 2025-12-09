@@ -44,37 +44,26 @@ export default function ProductsManager() {
       const formData = new FormData()
       formData.append("file", file)
 
-      console.log("📤 Загрузка изображения:", file.name, file.size, "bytes")
+      console.log("📤 Загрузка изображения на S3:", file.name, file.size, "bytes")
 
-      // Пробуем сначала S3
-      let response = await fetch("/api/upload", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       })
 
-      let data = await response.json()
+      const data = await response.json()
 
-      // Если S3 не сработал, пробуем локальную загрузку
-      if (!response.ok || !data.imageUrl) {
-        console.log("⚠️ S3 не сработал, пробуем локальную загрузку...")
-        response = await fetch("/api/upload-local", {
-          method: "POST",
-          body: formData,
-        })
-        data = await response.json()
-      }
-
-      if (data.imageUrl) {
-        console.log("✅ Изображение загружено:", data.imageUrl)
+      if (response.ok && data.imageUrl) {
+        console.log("✅ Изображение загружено на S3:", data.imageUrl)
         setEditingProduct({ ...editingProduct, image: data.imageUrl })
-        alert("Изображение успешно загружено!")
+        alert("Изображение успешно загружено на S3!")
       } else {
-        console.error("❌ Не удалось получить URL изображения")
-        alert(`Ошибка: ${data.error || "Не удалось загрузить изображение"}`)
+        console.error("❌ Ошибка загрузки:", data.error)
+        alert(`Ошибка загрузки: ${data.error || "Не удалось загрузить изображение"}`)
       }
     } catch (error) {
       console.error("❌ Ошибка загрузки изображения:", error)
-      alert("Ошибка загрузки изображения. Проверьте консоль.")
+      alert("Ошибка загрузки изображения на S3. Проверьте настройки S3.")
     } finally {
       setUploading(false)
     }

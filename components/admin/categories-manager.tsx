@@ -54,36 +54,25 @@ export default function CategoriesManager() {
       const formData = new FormData()
       formData.append("file", file)
 
-      console.log("📤 Загрузка изображения для категории:", categoryId)
+      console.log("📤 Загрузка изображения для категории на S3:", categoryId)
 
-      // Пробуем сначала S3
-      let response = await fetch("/api/upload", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       })
 
-      let data = await response.json()
+      const data = await response.json()
 
-      // Если S3 не сработал, пробуем локальную загрузку
-      if (!response.ok || !data.imageUrl) {
-        console.log("⚠️ S3 не сработал, пробуем локальную загрузку...")
-        response = await fetch("/api/upload-local", {
-          method: "POST",
-          body: formData,
-        })
-        data = await response.json()
-      }
-
-      if (data.imageUrl) {
-        console.log("✅ Изображение загружено:", data.imageUrl)
+      if (response.ok && data.imageUrl) {
+        console.log("✅ Изображение загружено на S3:", data.imageUrl)
         setCategoryImages({ ...categoryImages, [categoryId]: data.imageUrl })
-        alert("Изображение успешно загружено!")
+        alert("Изображение успешно загружено на S3!")
       } else {
-        alert(`Ошибка: ${data.error || "Не удалось загрузить изображение"}`)
+        alert(`Ошибка загрузки: ${data.error || "Не удалось загрузить изображение"}`)
       }
     } catch (error) {
       console.error("❌ Ошибка загрузки изображения:", error)
-      alert("Ошибка загрузки изображения")
+      alert("Ошибка загрузки изображения на S3. Проверьте настройки S3.")
     } finally {
       setUploading(null)
     }
