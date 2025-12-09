@@ -66,13 +66,13 @@ Value: d0bb84a6-35788b9e-6ba9-47ec-a1a8-68e9ea3ac4e9
 10. S3_ACCESS_KEY
 ───────────────────────────────────────────────────────────────
 Name:  S3_ACCESS_KEY
-Value: COIYK2SG8X3MH8K3MYA
+Value: 31MKAB1U3N1GEZSPJ09K
 
 ───────────────────────────────────────────────────────────────
 11. S3_SECRET_KEY
 ───────────────────────────────────────────────────────────────
 Name:  S3_SECRET_KEY
-Value: OUFPnIud8H1Gk7nwLxZD4hjDjP0bBuIWq1RgV4fG
+Value: QloZiMNHPwJJPST1ShXZLnq4TS77FLMkNfLngSD4
 
 ═══════════════════════════════════════════════════════════════
 
